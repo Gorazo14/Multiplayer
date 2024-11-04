@@ -8,6 +8,9 @@ using UnityEngine;
 public class PlayerNetwork : NetworkBehaviour
 {
 
+    [SerializeField] private Transform spawnedObjectPrefab;
+    private Transform spawnedObjectTransform;
+
     // Initializing the network variable, and giving network permission to the host and client
     private NetworkVariable<MyCustomData> randomNumber = new NetworkVariable<MyCustomData>(new MyCustomData
     {
@@ -48,6 +51,8 @@ public class PlayerNetwork : NetworkBehaviour
         // Changing the values of the network variable
         if (Input.GetKeyDown(KeyCode.T))
         {
+            spawnedObjectTransform = Instantiate(spawnedObjectPrefab);
+            spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
             randomNumber.Value = new MyCustomData
             {
                 _int = Random.Range(0, 10),
@@ -55,6 +60,11 @@ public class PlayerNetwork : NetworkBehaviour
                 _string = "This is a custom message!",
             };
         }
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            Destroy(spawnedObjectTransform.gameObject);
+        }
+
 
         if (Input.GetKey(KeyCode.W))
         {
