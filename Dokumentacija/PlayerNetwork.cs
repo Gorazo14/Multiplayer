@@ -10,37 +10,7 @@ public class PlayerNetwork : NetworkBehaviour
 
     [SerializeField] private Transform spawnedObjectPrefab;
     private Transform spawnedObjectTransform;
-
-    // Initializing the network variable, and giving network permission to the host and client
-    private NetworkVariable<MyCustomData> randomNumber = new NetworkVariable<MyCustomData>(new MyCustomData
-    {
-        _int = 56,
-        _bool = false,
-    }, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
-    // Writing in the console only once, where all variables have to be added
-    public override void OnNetworkSpawn()
-    {
-        randomNumber.OnValueChanged += (MyCustomData previousValue, MyCustomData newValue) =>
-        {
-            Debug.Log(OwnerClientId + ": " + newValue._int + ": " + newValue._bool + ": " + newValue._string);
-        };
-    }
-
-    // Createing the custom data type construct, where all variables have to be serialized
-    public struct MyCustomData: INetworkSerializable
-    {
-        public int _int;
-        public bool _bool;
-        public FixedString128Bytes _string;
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref _int);
-            serializer.SerializeValue(ref _bool);
-            serializer.SerializeValue(ref _string);
-        }
-    }
+    [SerializeField] private Animator playerAnimator;
 
     private void Update()       
     {
@@ -53,12 +23,6 @@ public class PlayerNetwork : NetworkBehaviour
         {
             spawnedObjectTransform = Instantiate(spawnedObjectPrefab);
             spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
-            randomNumber.Value = new MyCustomData
-            {
-                _int = Random.Range(0, 10),
-                _bool = false,
-                _string = "This is a custom message!",
-            };
         }
         if (Input.GetKeyDown(KeyCode.Y))
         {
@@ -69,22 +33,41 @@ public class PlayerNetwork : NetworkBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             moveDir.z += 1f;
+            playerAnimator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.S))
         {
             moveDir.z -= 1f;
+            playerAnimator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.D))
         {
             moveDir.x += 1f;
+            playerAnimator.SetBool("isWalking", true);
         }
         if (Input.GetKey(KeyCode.A))
         {
             moveDir.x -= 1f;
+            playerAnimator.SetBool("isWalking", true);
         }
-
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            playerAnimator.SetBool("isWalking", false);
+        }
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            playerAnimator.SetBool("isWalking", false);
+        }
+        if (Input.GetKeyUp(KeyCode.D))
+        {
+            playerAnimator.SetBool("isWalking", false);
+        }
+        if (Input.GetKeyUp(KeyCode.A))
+        {
+            playerAnimator.SetBool("isWalking", false);
+        }
         float speed = 3f;
 
-        transform.position += speed * Time.deltaTime * moveDir;
+        transform.position += speed * Time.deltaTime * moveDir.normalized;
     }
 }
