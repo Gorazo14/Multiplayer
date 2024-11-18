@@ -12,22 +12,21 @@ public class Gun : MonoBehaviour
     public GameObject impactEffect;
 
 
-    private float nextTimeToFire = 0f; 
+    private float nextTimeToFire = 0f;
    
         
   // Update is called once per frame
   void Update() {
   
-        if (Input .GetButton("Fire1") && Time.time >= nextTimeToFire )
+        if (Input.GetMouseButtonDown(0) && Time.time >= nextTimeToFire )
         {
             nextTimeToFire = Time.time +1f / fireRate;   
             Shoot();
         }
                 
-                
    }
 
-    void Shoot() 
+    void Shoot()
     {
         RaycastHit hit;
         if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
@@ -37,16 +36,14 @@ public class Gun : MonoBehaviour
             Target target = hit.transform.GetComponent<Target>();
             if (target != null)
             {
-                target.TakeDamage(damage);            
+                target.TakeDamage(damage);
+                Debug.Log(target.health);
             }
 
             if (hit.rigidbody != null)
             {
-                hit.rigidbody.AddForce(-hit.normal * impactForce);   
+                hit.rigidbody.AddForce(-hit.normal * impactForce);
             }
-
-           GameObject impactGo = Instantiate (impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
-            Destroy(impactGo, 2f);
         }
     }
 }
